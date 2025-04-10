@@ -1,0 +1,104 @@
+Event 1: First Talk
+
+Date: 4 July 2020
+
+Description: Our very first conversation that marked the beginning of our journey.
+
+Image: first_talk.jpg
+
+Event 2: Aviral Proposes Shalli
+
+Date: 2 August 2020
+
+Description: Aviral proposed to Shalli, marking a significant and heartfelt moment in our relationship.
+
+Image: aviral_propose_shalli.jpg
+
+Event 3: Discovery of Separated Chats
+
+Date: 18 August 2020
+
+Description: Aviral's didi discovered that our chats had been separated for several months, highlighting a challenging period.
+
+Image: chats_separated.jpg
+
+Event 4: Reconnection Call
+
+Date: 3 June 2021
+
+Description: Aviral called Shalli to reconnect and bridge the gap between them after a period of separation.
+
+Image: None
+
+Event 5: School Break and Changing Paths
+
+Date: Ambiguous – During 11th class (2022–23) and 12th class (2023–24)
+
+Description: We met frequently at the end of 10th grade, took a break for board exams, and then Shalli changed schools, leading to a long period without meeting.
+
+Image: None
+
+Event 6: Brief Run and Meeting
+
+Date: 27 January 2024
+
+Description: Aviral bunked school, ran (with friends on a scooty) towards Shalli’s house, and managed a brief, fleeting meeting near her home.
+
+Image: None
+
+Event 7: ASVM School Farewell
+
+Date: 9 February 2024
+
+Description: We met at the farewell of ASVM School; Aviral picked Shalli up on his scooty to attend the event.
+
+Image: asvm_farewell.jpg
+
+Event 8: Exam Center Meeting
+
+Date: 19 March 2024
+
+Description: Aviral visited her exam center at Udaya during her last board exam in Biology, resulting in a brief yet memorable meeting.
+
+Image: exam_center_udaya.jpg
+
+Event 9: Smart Bazar Encounter
+
+Date: 15 September 2024
+
+Description: Before starting college, by Krishna’s grace, we met at Smart Bazar. Shalli arrived with her family, and Aviral hurried there; they even held hands in the lift in front of her family.
+
+Image: None
+
+Event 10: First College Call
+
+Date: 17 September 2024
+
+Description: When Aviral Reached collage, he called shalli.
+
+Image: first_college_call.jpg
+
+Event 11: Guptar Ghat Longest Meet
+
+Date: 20 January 2025
+
+Description: We met at Guptar Ghat for our longest and most intimate meeting to date, complete with a lip-to-lip kiss and over an hour of deep conversation.
+
+Image: guptar_ghat_meet.jpg
+
+Event 12: Holi Vacation Reunion
+
+Date: 19 March 2025
+
+Description: During Holi vacation near our old school (ASVM), we Met; we ate ice cream, talked, and it was the first time Shalli playfully beat Aviral on his back – exactly one year after our Udaya meeting.
+
+Image: holi_vacation_meet.jpg
+
+Event 13: Handmade Birthday Gift
+
+Date: 22 March 2025
+
+Description: Aviral decided to create this heartfelt project as a handmade birthday gift for Shalli, filled with love and effort, for her special day.
+
+Image: None
+
