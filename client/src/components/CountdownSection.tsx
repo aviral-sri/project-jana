@@ -9,7 +9,7 @@ interface CountdownSectionProps {
 }
 
 const CountdownSection = ({ settings, onAnniversary }: CountdownSectionProps) => {
-  const anniversaryDate = settings?.anniversaryDate || '2021-08-15';
+  const anniversaryDate = settings?.anniversaryDate || '2020-08-02T19:55:00';
   const countdown = useCountdown(anniversaryDate);
   const relationshipDuration = useRelationshipDuration(anniversaryDate);
 
