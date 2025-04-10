@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -18,8 +19,16 @@ export const timelineEvents = pgTable("timeline_events", {
   location: text("location"),
   imageUrl: text("image_url"),
   createdAt: timestamp("created_at").defaultNow(),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
 });
+
+// Define relations for timeline events
+export const timelineEventsRelations = relations(timelineEvents, ({ one }) => ({
+  user: one(users, {
+    fields: [timelineEvents.userId],
+    references: [users.id],
+  }),
+}));
 
 // Photos table
 export const photos = pgTable("photos", {
@@ -29,8 +38,16 @@ export const photos = pgTable("photos", {
   imageUrl: text("image_url").notNull(),
   liked: boolean("liked").default(false),
   createdAt: timestamp("created_at").defaultNow(),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
 });
+
+// Define relations for photos
+export const photosRelations = relations(photos, ({ one }) => ({
+  user: one(users, {
+    fields: [photos.userId],
+    references: [users.id],
+  }),
+}));
 
 // Notes table
 export const notes = pgTable("notes", {
@@ -38,8 +55,16 @@ export const notes = pgTable("notes", {
   content: text("content").notNull(),
   author: text("author").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
 });
+
+// Define relations for notes
+export const notesRelations = relations(notes, ({ one }) => ({
+  user: one(users, {
+    fields: [notes.userId],
+    references: [users.id],
+  }),
+}));
 
 // Settings table for dates and countdowns
 export const settings = pgTable("settings", {
@@ -48,8 +73,24 @@ export const settings = pgTable("settings", {
   birthdayDate: text("birthday_date"),
   anniversaryMessage: text("anniversary_message"),
   birthdayMessage: text("birthday_message"),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
 });
+
+// Define relations for settings
+export const settingsRelations = relations(settings, ({ one }) => ({
+  user: one(users, {
+    fields: [settings.userId],
+    references: [users.id],
+  }),
+}));
+
+// Define user relations
+export const usersRelations = relations(users, ({ many }) => ({
+  timelineEvents: many(timelineEvents),
+  photos: many(photos),
+  notes: many(notes),
+  settings: many(settings),
+}));
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
