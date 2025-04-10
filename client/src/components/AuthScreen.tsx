@@ -3,10 +3,11 @@ import { useToast } from "@/hooks/use-toast";
 import { createHeart } from '../lib/utils';
 
 interface AuthScreenProps {
-  onLogin: (passkey: string) => Promise<any>;
+  onLogin: (username: string, passkey: string) => Promise<any>;
 }
 
 const AuthScreen = ({ onLogin }: AuthScreenProps) => {
+  const [username, setUsername] = useState('');
   const [passkey, setPasskey] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +26,12 @@ const AuthScreen = ({ onLogin }: AuthScreenProps) => {
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPasskey(e.target.value);
+    const { id, value } = e.target;
+    if (id === 'username') {
+      setUsername(value);
+    } else if (id === 'passkey') {
+      setPasskey(value);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -34,14 +40,14 @@ const AuthScreen = ({ onLogin }: AuthScreenProps) => {
     setIsLoading(true);
 
     try {
-      await onLogin(passkey);
+      await onLogin(username, passkey);
       // Login successful, parent component will handle redirect
     } catch (error) {
       console.error('Login error:', error);
-      setLoginError('Invalid passkey');
+      setLoginError('Invalid credentials');
       toast({
         title: "Access Denied",
-        description: "Please enter the correct passkey to enter our special place.",
+        description: "Please enter the correct username and passkey to enter our special place.",
         variant: "destructive"
       });
     } finally {
@@ -54,9 +60,22 @@ const AuthScreen = ({ onLogin }: AuthScreenProps) => {
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
         <div className="p-8 text-center">
           <h1 className="font-accent text-4xl md:text-5xl text-primary mb-6">Project Jana</h1>
-          <p className="text-neutral-dark mb-8 font-body">Enter the passkey to continue to our special place</p>
+          <p className="text-neutral-dark mb-8 font-body">Enter your username and passkey to continue to our special place</p>
           
           <form className="space-y-4" onSubmit={handleLogin}>
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-left mb-1">Username</label>
+              <input 
+                type="text" 
+                id="username" 
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                placeholder="Enter your username"
+                value={username}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                required
+              />
+            </div>
             <div>
               <label htmlFor="passkey" className="block text-sm font-medium text-left mb-1">Passkey</label>
               <input 

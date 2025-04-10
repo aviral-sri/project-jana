@@ -36,16 +36,16 @@ export const useAuth = () => {
     setLoading(false);
   }, []);
 
-  const login = async (passkey: string) => {
+  const login = async (username: string, passkey: string) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await authenticateWithPasskey(passkey);
+      const result = await authenticateWithPasskey(username, passkey);
       setUser(result.user);
       localStorage.setItem('user', JSON.stringify(result.user));
       return result.user;
     } catch (e) {
-      setError('Invalid passkey');
+      setError('Invalid credentials');
       throw e;
     } finally {
       setLoading(false);
