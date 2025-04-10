@@ -73,14 +73,14 @@ export const logoutUser = async () => {
 // Timeline functions
 export const getTimelineEvents = async () => {
   try {
-    const eventsCollection = collection(db, "timelineEvents");
-    const q = query(eventsCollection, orderBy("date", "asc"));
-    const snapshot = await getDocs(q);
+    const response = await fetch('/api/timeline');
     
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    if (!response.ok) {
+      throw new Error('Failed to fetch timeline events');
+    }
+    
+    const events = await response.json();
+    return events;
   } catch (error) {
     console.error("Error getting timeline events:", error);
     throw error;
@@ -89,16 +89,20 @@ export const getTimelineEvents = async () => {
 
 export const addTimelineEvent = async (eventData: any) => {
   try {
-    const eventsCollection = collection(db, "timelineEvents");
-    const docRef = await addDoc(eventsCollection, {
-      ...eventData,
-      createdAt: Timestamp.now()
+    const response = await fetch('/api/timeline', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData),
     });
     
-    return {
-      id: docRef.id,
-      ...eventData
-    };
+    if (!response.ok) {
+      throw new Error('Failed to add timeline event');
+    }
+    
+    const newEvent = await response.json();
+    return newEvent;
   } catch (error) {
     console.error("Error adding timeline event:", error);
     throw error;
@@ -107,13 +111,20 @@ export const addTimelineEvent = async (eventData: any) => {
 
 export const updateTimelineEvent = async (id: string, eventData: any) => {
   try {
-    const eventRef = doc(db, "timelineEvents", id);
-    await updateDoc(eventRef, eventData);
+    const response = await fetch(`/api/timeline/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData),
+    });
     
-    return {
-      id,
-      ...eventData
-    };
+    if (!response.ok) {
+      throw new Error('Failed to update timeline event');
+    }
+    
+    const updatedEvent = await response.json();
+    return updatedEvent;
   } catch (error) {
     console.error("Error updating timeline event:", error);
     throw error;
@@ -122,8 +133,14 @@ export const updateTimelineEvent = async (id: string, eventData: any) => {
 
 export const deleteTimelineEvent = async (id: string) => {
   try {
-    const eventRef = doc(db, "timelineEvents", id);
-    await deleteDoc(eventRef);
+    const response = await fetch(`/api/timeline/${id}`, {
+      method: 'DELETE',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to delete timeline event');
+    }
+    
     return true;
   } catch (error) {
     console.error("Error deleting timeline event:", error);
@@ -134,14 +151,14 @@ export const deleteTimelineEvent = async (id: string) => {
 // Photo functions
 export const getPhotos = async () => {
   try {
-    const photosCollection = collection(db, "photos");
-    const q = query(photosCollection, orderBy("date", "desc"));
-    const snapshot = await getDocs(q);
+    const response = await fetch('/api/photos');
     
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    if (!response.ok) {
+      throw new Error('Failed to fetch photos');
+    }
+    
+    const photos = await response.json();
+    return photos;
   } catch (error) {
     console.error("Error getting photos:", error);
     throw error;
