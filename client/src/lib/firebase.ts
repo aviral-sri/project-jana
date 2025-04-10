@@ -167,28 +167,27 @@ export const getPhotos = async () => {
 
 export const addPhoto = async (photoData: any, file: File) => {
   try {
-    // Upload the image to Firebase Storage
-    const storageRef = ref(storage, `photos/${file.name}_${Date.now()}`);
-    await uploadBytes(storageRef, file);
+    // Create FormData and append the file and other data
+    const formData = new FormData();
     
-    // Get the download URL
-    const downloadURL = await getDownloadURL(storageRef);
+    // Append photo data as JSON string
+    formData.append('data', JSON.stringify(photoData));
     
-    // Add photo data to Firestore
-    const photosCollection = collection(db, "photos");
-    const docRef = await addDoc(photosCollection, {
-      ...photoData,
-      imageUrl: downloadURL,
-      createdAt: Timestamp.now(),
-      liked: false
+    // Append the file
+    formData.append('image', file);
+    
+    // Send the request
+    const response = await fetch('/api/photos', {
+      method: 'POST',
+      body: formData,
     });
     
-    return {
-      id: docRef.id,
-      ...photoData,
-      imageUrl: downloadURL,
-      liked: false
-    };
+    if (!response.ok) {
+      throw new Error('Failed to add photo');
+    }
+    
+    const newPhoto = await response.json();
+    return newPhoto;
   } catch (error) {
     console.error("Error adding photo:", error);
     throw error;
@@ -197,15 +196,16 @@ export const addPhoto = async (photoData: any, file: File) => {
 
 export const togglePhotoLike = async (id: string, currentStatus: boolean) => {
   try {
-    const photoRef = doc(db, "photos", id);
-    await updateDoc(photoRef, {
-      liked: !currentStatus
+    const response = await fetch(`/api/photos/${id}/like`, {
+      method: 'PUT',
     });
     
-    return {
-      id,
-      liked: !currentStatus
-    };
+    if (!response.ok) {
+      throw new Error('Failed to toggle photo like status');
+    }
+    
+    const updatedPhoto = await response.json();
+    return updatedPhoto;
   } catch (error) {
     console.error("Error toggling photo like:", error);
     throw error;
@@ -214,19 +214,12 @@ export const togglePhotoLike = async (id: string, currentStatus: boolean) => {
 
 export const deletePhoto = async (id: string, imageUrl: string) => {
   try {
-    // Delete from Firestore
-    const photoRef = doc(db, "photos", id);
-    await deleteDoc(photoRef);
+    const response = await fetch(`/api/photos/${id}`, {
+      method: 'DELETE',
+    });
     
-    // Delete from Storage
-    if (imageUrl) {
-      try {
-        const storageRef = ref(storage, imageUrl);
-        await deleteObject(storageRef);
-      } catch (storageError) {
-        console.error("Error deleting photo from storage:", storageError);
-        // Continue with deletion even if storage delete fails
-      }
+    if (!response.ok) {
+      throw new Error('Failed to delete photo');
     }
     
     return true;
@@ -239,14 +232,14 @@ export const deletePhoto = async (id: string, imageUrl: string) => {
 // Notes functions
 export const getNotes = async () => {
   try {
-    const notesCollection = collection(db, "notes");
-    const q = query(notesCollection, orderBy("createdAt", "desc"));
-    const snapshot = await getDocs(q);
+    const response = await fetch('/api/notes');
     
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    if (!response.ok) {
+      throw new Error('Failed to fetch notes');
+    }
+    
+    const notes = await response.json();
+    return notes;
   } catch (error) {
     console.error("Error getting notes:", error);
     throw error;
@@ -255,17 +248,20 @@ export const getNotes = async () => {
 
 export const addNote = async (noteData: any) => {
   try {
-    const notesCollection = collection(db, "notes");
-    const docRef = await addDoc(notesCollection, {
-      ...noteData,
-      createdAt: Timestamp.now()
+    const response = await fetch('/api/notes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(noteData),
     });
     
-    return {
-      id: docRef.id,
-      ...noteData,
-      createdAt: Timestamp.now()
-    };
+    if (!response.ok) {
+      throw new Error('Failed to add note');
+    }
+    
+    const newNote = await response.json();
+    return newNote;
   } catch (error) {
     console.error("Error adding note:", error);
     throw error;
@@ -274,13 +270,20 @@ export const addNote = async (noteData: any) => {
 
 export const updateNote = async (id: string, noteData: any) => {
   try {
-    const noteRef = doc(db, "notes", id);
-    await updateDoc(noteRef, noteData);
+    const response = await fetch(`/api/notes/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(noteData),
+    });
     
-    return {
-      id,
-      ...noteData
-    };
+    if (!response.ok) {
+      throw new Error('Failed to update note');
+    }
+    
+    const updatedNote = await response.json();
+    return updatedNote;
   } catch (error) {
     console.error("Error updating note:", error);
     throw error;
@@ -289,8 +292,14 @@ export const updateNote = async (id: string, noteData: any) => {
 
 export const deleteNote = async (id: string) => {
   try {
-    const noteRef = doc(db, "notes", id);
-    await deleteDoc(noteRef);
+    const response = await fetch(`/api/notes/${id}`, {
+      method: 'DELETE',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to delete note');
+    }
+    
     return true;
   } catch (error) {
     console.error("Error deleting note:", error);
@@ -301,23 +310,14 @@ export const deleteNote = async (id: string) => {
 // Settings functions
 export const getSettings = async () => {
   try {
-    const settingsDoc = doc(db, "settings", "app-settings");
-    const snapshot = await getDoc(settingsDoc);
+    const response = await fetch('/api/settings');
     
-    if (snapshot.exists()) {
-      return snapshot.data();
-    } else {
-      // Create default settings if they don't exist
-      const defaultSettings = {
-        anniversaryDate: "2021-08-15",
-        birthdayDate: "",
-        anniversaryMessage: "Today marks another beautiful year of our journey together. Every moment with you has been a blessing. Here's to many more years of love, laughter, and creating precious memories.",
-        birthdayMessage: ""
-      };
-      
-      await setDoc(settingsDoc, defaultSettings);
-      return defaultSettings;
+    if (!response.ok) {
+      throw new Error('Failed to fetch settings');
     }
+    
+    const settings = await response.json();
+    return settings;
   } catch (error) {
     console.error("Error getting settings:", error);
     throw error;
@@ -326,10 +326,20 @@ export const getSettings = async () => {
 
 export const updateSettings = async (settingsData: any) => {
   try {
-    const settingsRef = doc(db, "settings", "app-settings");
-    await setDoc(settingsRef, settingsData, { merge: true });
+    const response = await fetch('/api/settings', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(settingsData),
+    });
     
-    return settingsData;
+    if (!response.ok) {
+      throw new Error('Failed to update settings');
+    }
+    
+    const updatedSettings = await response.json();
+    return updatedSettings;
   } catch (error) {
     console.error("Error updating settings:", error);
     throw error;
