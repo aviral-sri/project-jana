@@ -3,6 +3,29 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertNoteSchema, insertPhotoSchema, insertSettingsSchema, insertTimelineEventSchema, insertUserSchema, User } from "@shared/schema";
 import { z } from "zod";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// Set up file upload directory
+const uploadDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configure multer storage
+const storage2 = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+// Create multer upload instance
+const upload = multer({ storage: storage2 });
 
 // Extend the Express Request type to include user property
 // Augment the Express Request type
@@ -95,23 +118,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post('/api/timeline', async (req, res) => {
+  app.post('/api/timeline', upload.single('image'), async (req, res) => {
     try {
-      const data = insertTimelineEventSchema.parse(req.body);
+      let eventData;
+      
+      // Check if there's a file upload or just JSON data
+      if (req.file) {
+        // Parse JSON data that was sent as a string in the 'data' field
+        try {
+          eventData = JSON.parse(req.body.data);
+        } catch (err) {
+          return res.status(400).json({ message: "Invalid JSON data provided" });
+        }
+        
+        // Create relative URL for the uploaded image
+        const imageUrl = `/uploads/${req.file.filename}`;
+        
+        // Add image URL to event data
+        eventData = {
+          ...eventData,
+          imageUrl
+        };
+      } else {
+        // If no file was uploaded, use the JSON body directly
+        eventData = req.body;
+      }
+      
+      const data = insertTimelineEventSchema.parse(eventData);
       const newEvent = await storage.createTimelineEvent(data);
       res.status(201).json(newEvent);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid event data", errors: error.errors });
       }
+      console.error("Error creating timeline event:", error);
       res.status(500).json({ message: "Error creating timeline event" });
     }
   });
   
-  app.put('/api/timeline/:id', async (req, res) => {
+  app.put('/api/timeline/:id', upload.single('image'), async (req, res) => {
     const id = parseInt(req.params.id);
     try {
-      const data = insertTimelineEventSchema.parse(req.body);
+      let eventData;
+      
+      // Check if there's a file upload or just JSON data
+      if (req.file) {
+        // Parse JSON data that was sent as a string in the 'data' field
+        try {
+          eventData = JSON.parse(req.body.data);
+        } catch (err) {
+          return res.status(400).json({ message: "Invalid JSON data provided" });
+        }
+        
+        // Create relative URL for the uploaded image
+        const imageUrl = `/uploads/${req.file.filename}`;
+        
+        // Add image URL to event data
+        eventData = {
+          ...eventData,
+          imageUrl
+        };
+      } else {
+        // If no file was uploaded, use the JSON body directly
+        eventData = req.body;
+      }
+      
+      const data = insertTimelineEventSchema.parse(eventData);
       const updatedEvent = await storage.updateTimelineEvent(id, data);
       if (!updatedEvent) {
         return res.status(404).json({ message: "Event not found" });
@@ -121,6 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid event data", errors: error.errors });
       }
+      console.error("Error updating timeline event:", error);
       res.status(500).json({ message: "Error updating timeline event" });
     }
   });
@@ -148,15 +221,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post('/api/photos', async (req, res) => {
+  app.post('/api/photos', upload.single('image'), async (req, res) => {
     try {
-      const data = insertPhotoSchema.parse(req.body);
+      if (!req.file) {
+        return res.status(400).json({ message: "No image file provided" });
+      }
+      
+      // Parse JSON data that was sent as a string in the 'data' field
+      let photoData;
+      try {
+        photoData = JSON.parse(req.body.data);
+      } catch (err) {
+        return res.status(400).json({ message: "Invalid JSON data provided" });
+      }
+      
+      // Create relative URL for the uploaded image
+      const imageUrl = `/uploads/${req.file.filename}`;
+      
+      // Add image URL to photo data
+      const data = insertPhotoSchema.parse({
+        ...photoData,
+        imageUrl,
+        liked: false
+      });
+      
       const newPhoto = await storage.createPhoto(data);
       res.status(201).json(newPhoto);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid photo data", errors: error.errors });
       }
+      console.error("Error creating photo:", error);
       res.status(500).json({ message: "Error creating photo" });
     }
   });

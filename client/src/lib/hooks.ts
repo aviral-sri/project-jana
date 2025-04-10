@@ -94,11 +94,13 @@ export const useTimelineEvents = () => {
     try {
       let newEvent;
       if (file) {
-        // Handle file upload logic if needed
-        newEvent = await addTimelineEvent({
-          ...eventData,
-          // Handle file upload logic here if needed
-        });
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(eventData));
+        formData.append('image', file);
+        
+        // Call the API function with FormData
+        newEvent = await addTimelineEvent(formData);
       } else {
         newEvent = await addTimelineEvent(eventData);
       }
