@@ -112,9 +112,21 @@ export const useTimelineEvents = () => {
     }
   };
 
-  const updateEvent = async (id: string, eventData: any) => {
+  const updateEvent = async (id: string, eventData: any, file?: File) => {
     try {
-      const updatedEvent = await updateTimelineEvent(id, eventData);
+      let updatedEvent;
+      if (file) {
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(eventData));
+        formData.append('image', file);
+        
+        // Call the API function with FormData
+        updatedEvent = await updateTimelineEvent(id, formData);
+      } else {
+        updatedEvent = await updateTimelineEvent(id, eventData);
+      }
+      
       setEvents(prev => prev.map(event => 
         event.id === id ? { ...event, ...updatedEvent } : event
       ));

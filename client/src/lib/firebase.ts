@@ -89,13 +89,23 @@ export const getTimelineEvents = async () => {
 
 export const addTimelineEvent = async (eventData: any) => {
   try {
-    const response = await fetch('/api/timeline', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(eventData),
-    });
+    let response;
+    
+    // Check if eventData is FormData (for file uploads)
+    if (eventData instanceof FormData) {
+      response = await fetch('/api/timeline', {
+        method: 'POST',
+        body: eventData, // No Content-Type header for FormData (browser sets it with boundary)
+      });
+    } else {
+      response = await fetch('/api/timeline', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventData),
+      });
+    }
     
     if (!response.ok) {
       throw new Error('Failed to add timeline event');
@@ -111,13 +121,23 @@ export const addTimelineEvent = async (eventData: any) => {
 
 export const updateTimelineEvent = async (id: string, eventData: any) => {
   try {
-    const response = await fetch(`/api/timeline/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(eventData),
-    });
+    let response;
+    
+    // Check if eventData is FormData (for file uploads)
+    if (eventData instanceof FormData) {
+      response = await fetch(`/api/timeline/${id}`, {
+        method: 'PUT',
+        body: eventData, // No Content-Type header for FormData (browser sets it with boundary)
+      });
+    } else {
+      response = await fetch(`/api/timeline/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventData),
+      });
+    }
     
     if (!response.ok) {
       throw new Error('Failed to update timeline event');

@@ -67,17 +67,30 @@ const Home = ({ user, onLogout }: HomeProps) => {
 
   const handleAddEvent = async (eventData: TimelineEventForm) => {
     try {
+      const imageFile = eventData.imageFile;
+      
+      // Create a copy of the eventData without the imageFile property
+      const { imageFile: _, ...eventDataWithoutFile } = eventData;
+      
       if (selectedEvent) {
         // Editing existing event
-        const updatedEvent = await updateEvent(selectedEvent.id, {
-          ...eventData,
-          imageUrl: selectedEvent.imageUrl // Preserve the existing imageUrl
-        });
-        setSelectedEvent(null);
-        return updatedEvent;
+        if (imageFile) {
+          // If there's a new image file, use it
+          const updatedEvent = await updateEvent(selectedEvent.id, eventDataWithoutFile, imageFile);
+          setSelectedEvent(null);
+          return updatedEvent;
+        } else {
+          // If no new image, preserve the existing image URL
+          const updatedEvent = await updateEvent(selectedEvent.id, {
+            ...eventDataWithoutFile,
+            imageUrl: selectedEvent.imageUrl
+          });
+          setSelectedEvent(null);
+          return updatedEvent;
+        }
       } else {
         // Adding new event
-        const newEvent = await addEvent(eventData);
+        const newEvent = await addEvent(eventDataWithoutFile, imageFile || undefined);
         return newEvent;
       }
     } catch (error) {
