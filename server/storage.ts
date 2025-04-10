@@ -83,7 +83,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(timelineEvents)
       .where(eq(timelineEvents.id, id));
-    return result.rowCount > 0;
+    return !!result.rowCount;
   }
 
   // Photo methods
@@ -122,7 +122,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(photos)
       .where(eq(photos.id, id));
-    return result.rowCount > 0;
+    return !!result.rowCount;
   }
 
   // Note methods
@@ -151,7 +151,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(notes)
       .where(eq(notes.id, id));
-    return result.rowCount > 0;
+    return !!result.rowCount;
   }
 
   // Settings methods

@@ -5,11 +5,10 @@ import { insertNoteSchema, insertPhotoSchema, insertSettingsSchema, insertTimeli
 import { z } from "zod";
 
 // Extend the Express Request type to include user property
-declare global {
-  namespace Express {
-    interface Request {
-      user?: User;
-    }
+// Augment the Express Request type
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: User;
   }
 }
 
