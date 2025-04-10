@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
-  loginUser, 
+  loginUser,
+  signInWithGoogle,
   getTimelineEvents, 
   getPhotos, 
   getNotes, 
@@ -52,6 +53,22 @@ export const useAuth = () => {
     }
   };
 
+  const loginWithGoogle = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await signInWithGoogle();
+      setUser(result.user);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      return result.user;
+    } catch (e) {
+      setError('Failed to sign in with Google');
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
@@ -62,6 +79,7 @@ export const useAuth = () => {
     loading,
     error,
     login,
+    loginWithGoogle,
     logout
   };
 };

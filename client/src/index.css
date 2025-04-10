@@ -11,3 +11,45 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+/* Heart animation styles */
+.heart {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #FF6B6B;
+  transform: rotate(45deg);
+  animation: heartfloat 4s ease-in-out infinite;
+}
+
+.heart:before, .heart:after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #FF6B6B;
+  border-radius: 50%;
+}
+
+.heart:before {
+  top: -10px;
+  left: 0;
+}
+
+.heart:after {
+  top: 0;
+  left: -10px;
+}
+
+@keyframes heartfloat {
+  0%, 100% {
+    transform: rotate(45deg) translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(45deg) translateY(-20px);
+  }
+  100% {
+    opacity: 0;
+  }
+}
