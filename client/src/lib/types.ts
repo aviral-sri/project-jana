@@ -58,9 +58,8 @@ export interface CountdownData {
 }
 
 // Form types
-export interface LoginForm {
-  username: string;
-  password: string;
+export interface PasskeyForm {
+  passkey: string;
 }
 
 export interface TimelineEventForm {

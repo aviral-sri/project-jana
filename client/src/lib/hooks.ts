@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  loginUser,
-  signInWithGoogle,
+  authenticateWithPasskey,
   getTimelineEvents, 
   getPhotos, 
   getNotes, 
@@ -37,32 +36,16 @@ export const useAuth = () => {
     setLoading(false);
   }, []);
 
-  const login = async (username: string, password: string) => {
+  const login = async (passkey: string) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await loginUser(username, password);
+      const result = await authenticateWithPasskey(passkey);
       setUser(result.user);
       localStorage.setItem('user', JSON.stringify(result.user));
       return result.user;
     } catch (e) {
-      setError('Invalid username or password');
-      throw e;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loginWithGoogle = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await signInWithGoogle();
-      setUser(result.user);
-      localStorage.setItem('user', JSON.stringify(result.user));
-      return result.user;
-    } catch (e) {
-      setError('Failed to sign in with Google');
+      setError('Invalid passkey');
       throw e;
     } finally {
       setLoading(false);
@@ -79,7 +62,6 @@ export const useAuth = () => {
     loading,
     error,
     login,
-    loginWithGoogle,
     logout
   };
 };

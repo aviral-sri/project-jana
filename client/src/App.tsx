@@ -5,7 +5,7 @@ import Home from './pages/Home';
 import { Toaster } from "@/components/ui/toaster";
 
 function App() {
-  const { user, loading, login, loginWithGoogle, logout } = useAuth();
+  const { user, loading, login, logout } = useAuth();
   const [showAuthScreen, setShowAuthScreen] = useState(true);
   
   useEffect(() => {
@@ -27,7 +27,7 @@ function App() {
   return (
     <div id="app" className="min-h-screen flex flex-col">
       {showAuthScreen ? (
-        <AuthScreen onLogin={login} onGoogleLogin={loginWithGoogle} />
+        <AuthScreen onLogin={login} />
       ) : (
         <Home user={user} onLogout={logout} />
       )}

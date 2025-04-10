@@ -20,42 +20,21 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Auth functions
-export const loginUser = async (username: string, password: string) => {
+// Simple passkey authentication
+export const authenticateWithPasskey = async (passkey: string) => {
   try {
-    // For backward compatibility, still support basic username/password
-    // This allows login with existing credentials
-    if ((username === 'aviral' && password === 'password') || 
-        (username === 'shaili' && password === 'password')) {
-      return { user: { username } };
+    // Define the valid passkeys - you can customize this as needed
+    const validPasskeys = ['love2023', 'jana2023', 'aviral&shaili'];
+    
+    if (validPasskeys.includes(passkey)) {
+      // If passkey is valid, return a simple user object
+      return { user: { username: 'couple' } };
     }
     
-    // If not a valid username/password, try Firebase auth
-    // For this app, we're currently using simple username/password
-    // In the future, we can add proper Firebase Authentication here
-    throw new Error("Invalid credentials");
+    // If passkey is not valid, throw an error
+    throw new Error("Invalid passkey");
   } catch (error) {
-    console.error("Login error:", error);
-    throw error;
-  }
-};
-
-// This is a helper function to sign in with Google
-export const signInWithGoogle = async () => {
-  try {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    
-    // Return user info
-    const user = {
-      username: result.user.displayName || 'User',
-      email: result.user.email,
-      uid: result.user.uid
-    };
-    
-    return { user };
-  } catch (error) {
-    console.error("Google sign-in error:", error);
+    console.error("Authentication error:", error);
     throw error;
   }
 };
