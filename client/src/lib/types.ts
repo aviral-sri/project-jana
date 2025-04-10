@@ -1,7 +1,8 @@
 // User types
 export interface User {
   username: string;
-  email?: string;
+  email?: string | null;
+  uid?: string;
 }
 
 // Timeline event types

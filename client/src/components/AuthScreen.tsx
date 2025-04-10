@@ -5,9 +5,10 @@ import { LoginForm } from '../lib/types';
 
 interface AuthScreenProps {
   onLogin: (username: string, password: string) => Promise<any>;
+  onGoogleLogin?: () => Promise<any>;
 }
 
-const AuthScreen = ({ onLogin }: AuthScreenProps) => {
+const AuthScreen = ({ onLogin, onGoogleLogin }: AuthScreenProps) => {
   const [loginForm, setLoginForm] = useState<LoginForm>({
     username: '',
     password: ''
@@ -58,17 +59,21 @@ const AuthScreen = ({ onLogin }: AuthScreenProps) => {
   };
   
   const handleGoogleLogin = async () => {
+    if (!onGoogleLogin) {
+      toast({
+        title: "Google Login Not Available",
+        description: "Google sign-in is not configured for this application.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setLoginError(null);
     setIsLoading(true);
     
     try {
-      const result = await signInWithGoogle();
-      // Pass the user to the main app
-      if (result.user) {
-        // We need to adapt the response to work with our existing onLogin handler
-        // which expects username and password
-        await onLogin(result.user.username, 'google-auth');
-      }
+      await onGoogleLogin();
+      // Login successful, parent component will handle redirect
     } catch (error) {
       console.error('Google login error:', error);
       setLoginError('Failed to login with Google');
