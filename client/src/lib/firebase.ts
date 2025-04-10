@@ -23,12 +23,34 @@ const storage = getStorage(app);
 // Simple passkey authentication
 export const authenticateWithPasskey = async (passkey: string) => {
   try {
-    // Define the valid passkeys - you can customize this as needed
-    const validPasskeys = ['love2023', 'jana2023', 'aviral&shaili'];
+    // Define the valid passkeys and associated usernames
+    const passkeyMap: Record<string, string> = {
+      'love2023': 'couple',
+      'jana2023': 'aviral',
+      'aviral&shaili': 'shaili'
+    };
     
-    if (validPasskeys.includes(passkey)) {
-      // If passkey is valid, return a simple user object
-      return { user: { username: 'couple' } };
+    if (passkey in passkeyMap) {
+      const username = passkeyMap[passkey];
+      
+      // Try to authenticate with backend
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          username, 
+          passkey 
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Authentication failed');
+      }
+      
+      const userData = await response.json();
+      return { user: userData };
     }
     
     // If passkey is not valid, throw an error

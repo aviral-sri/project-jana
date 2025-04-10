@@ -1,22 +1,49 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertNoteSchema, insertPhotoSchema, insertTimelineEventSchema, insertUserSchema } from "@shared/schema";
+import { insertNoteSchema, insertPhotoSchema, insertSettingsSchema, insertTimelineEventSchema, insertUserSchema, User } from "@shared/schema";
 import { z } from "zod";
 
+// Extend the Express Request type to include user property
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+    }
+  }
+}
+
+// Passkey map for validation
+const passkeyMap: Record<string, string> = {
+  'love2023': 'couple',
+  'jana2023': 'aviral',
+  'aviral&shaili': 'shaili'
+};
+
 // Simple auth middleware
-const authenticateUser = async (req: any, res: any, next: any) => {
-  const { username, password } = req.body;
+const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
+  const { username, passkey } = req.body;
   
-  if (!username || !password) {
+  if (!username || !passkey) {
     return res.status(401).json({ message: "Authentication required" });
   }
   
   try {
-    const user = await storage.getUserByUsername(username);
-    
-    if (!user || user.password !== password) {
+    // Check if passkey is valid
+    const validUsername = passkeyMap[passkey];
+    if (!validUsername || validUsername !== username) {
       return res.status(401).json({ message: "Invalid credentials" });
+    }
+    
+    // Try to find user in database
+    let user = await storage.getUserByUsername(username);
+    
+    // If user doesn't exist, create it
+    if (!user) {
+      user = await storage.createUser({
+        username,
+        password: passkey // Store passkey as password
+      });
     }
     
     req.user = user;
@@ -29,13 +56,24 @@ const authenticateUser = async (req: any, res: any, next: any) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post('/api/auth/login', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, passkey } = req.body;
     
     try {
-      const user = await storage.getUserByUsername(username);
+      // Check if passkey is valid
+      const validUsername = passkeyMap[passkey];
+      if (!validUsername || validUsername !== username) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
       
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid username or password" });
+      // Try to find user in database
+      let user = await storage.getUserByUsername(username);
+      
+      // If user doesn't exist, create it
+      if (!user) {
+        user = await storage.createUser({
+          username,
+          password: passkey // Store passkey as password
+        });
       }
       
       res.status(200).json({ 
@@ -43,6 +81,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username: user.username
       });
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ message: "Server error" });
     }
   });
